@@ -95,7 +95,7 @@ function completionProvider(manifest: any = []) {
 			return [];
 		}
 
-		return [...manifest].map((manifestItem): vscode.CompletionItem => {
+		return [...manifest].map((manifestItem): vscode.CompletionItem & any => {
 			return {
 				additionalTextEdits: [
 					vscode.TextEdit.delete(
