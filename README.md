@@ -22,14 +22,4 @@ Start typing the word `icon-` and you'll see a list of available icons appear wi
 
 #### Packaging
 
-We are using `vsce` to package and publish. `yarn vsce publish`
-
-If we have an expired personal access token, then we can login again.
-
-    You're using an expired Personal Access Token, please get a new PAT.
-    More info: https://aka.ms/vscodepat
-    error Command failed with exit code 1.
-
-Get your token here: https://dev.azure.com/PolymerMallard/
-This is your panel: https://marketplace.visualstudio.com/manage
-Login through CLI: `yarn vsce login PolymerMallard`
+We are using `vsce` to package and publish. `vsce package` && `vsce publish`
