@@ -174,20 +174,6 @@ export default class VsCodeHelper {
 	}
 
 	/**
-	 * Check if nothing is selected; normal caret position
-	 *
-	 * @return boolean
-	 */
-	public static nothingIsSelected(): boolean {
-		const editor = vscode.window.activeTextEditor;
-		const document: vscode.TextDocument | undefined = editor?.document;
-		let selections: vscode.Selection[] | undefined = editor?.selections;
-
-		// Default to the entire document
-		return !!(selections && selections.length <= 1 && selections[0].start.line === selections[0].end.line);
-	}
-
-	/**
 	 * Replace selections with string or functio
 	 *
 	 * @param vscode.Selection[] selections

@@ -32,8 +32,8 @@ export function deactivate() {}
  * @param IManifest manifest
  * @return
  */
-function hoverProvider(manifest = []) {
-	const options = {};
+function hoverProvider(manifest: any = []) {
+	const options: any = {};
 
 	/**
 	 * @param vscode.TextDocument document
@@ -78,9 +78,9 @@ function hoverProvider(manifest = []) {
  * @param IManifest manifest
  * @return
  */
-function completionProvider(manifest = []) {
+function completionProvider(manifest: any = []) {
 	const trigger: string = '-';
-	const options = {};
+	const options: any = {};
 
 	options.provideCompletionItems = async function (document: vscode.TextDocument, position: vscode.Position) {
 		const languageId = document.languageId;
