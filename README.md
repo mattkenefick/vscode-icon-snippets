@@ -10,6 +10,11 @@ Start typing the word `icon-` and you'll see a list of available icons appear wi
 
 ## Release Notes
 
+### 0.3.0
+
+-   Automatically encode icons for CSS/SCSS/LESS
+-   Added more file support
+
 ### 0.2.0
 
 -   Removed style tags from icons

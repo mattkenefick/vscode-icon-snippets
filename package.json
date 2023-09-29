@@ -33,15 +33,23 @@
 					},
 					"iconSnippets.selector": {
 						"default": [
+							"css",
+							"dhtml",
+							"edge",
 							"html",
 							"javascript",
 							"javascriptreact",
+							"markdown",
 							"ng-template",
+							"php",
+							"plaintext",
+							"scss",
+							"twig",
 							"typescript",
 							"typescriptreact",
+							"vue",
 							"vue-html",
-							"vue-pug",
-							"vue"
+							"xml"
 						],
 						"description": "Defines the documents where completion and hover are active",
 						"items": {
@@ -104,5 +112,5 @@
 		"vscode:prepublish": "yarn run package",
 		"watch": "webpack --watch"
 	},
-	"version": "0.2.3"
+	"version": "0.3.0"
 }
