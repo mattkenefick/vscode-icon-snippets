@@ -10,6 +10,13 @@ Start typing the word `icon-` and you'll see a list of available icons appear wi
 
 ## Release Notes
 
+### 0.4.0
+
+-   Normalize width, height, and other attributes
+-   Clean up icon syntax and useless groups
+-   Better support for langauges
+-   Additional icons
+
 ### 0.3.0
 
 -   Automatically encode icons for CSS/SCSS/LESS

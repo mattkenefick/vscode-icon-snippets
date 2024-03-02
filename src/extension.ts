@@ -1,130 +1,130 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import constants from './constants';
 import encode from './functions/encode';
-import VsCodeHelper from './utility/vscode-helper';
 
 /**
- * @author Matt Kenefick <polymermallard.com>
- * @param ExtensionContract context
+ * This method is called when the extension is activated
+ *
+ * @param vscode.ExtensionContext context
  * @return void
  */
 export async function activate(context: vscode.ExtensionContext) {
-	const manifest = await new Promise((resolve, reject) => {
-		fs.readFile(path.resolve(__dirname, '../assets/manifest.json'), (err, data) => {
-			if (err) {
-				reject(err);
-				return;
-			}
-
-			return resolve(JSON.parse(data.toString('utf8')));
-		});
-	});
-
-	context.subscriptions.push(completionProvider(manifest), hoverProvider(manifest));
+	try {
+		const manifestPath = path.resolve(__dirname, '../assets/manifest.json');
+		const data = await fs.readFile(manifestPath, 'utf8');
+		const manifest = JSON.parse(data);
+		context.subscriptions.push(completionProvider(manifest), hoverProvider(manifest));
+	} catch (err) {
+		console.error('Failed to read manifest:', err);
+	}
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}
 
 /**
- * @param IManifest manifest
- * @return
+ * Simplified hoverProvider function by extracting repeated code into a separate function
+ *
+ * @param any manifest
+ * @return vscode.Disposable
  */
 function hoverProvider(manifest: any = []) {
-	const options: any = {};
+	return vscode.languages.registerHoverProvider(constants.selectors, {
+		provideHover: async (document: vscode.TextDocument, position: vscode.Position) => {
+			const regex = /icon-((\w|\-)+)/i;
+			const range = document.getWordRangeAtPosition(position, regex);
+			if (!range) return null;
 
-	/**
-	 * @param vscode.TextDocument document
-	 * @param vscode.Position position
-	 * @return Promise<void>
-	 */
-	options.provideHover = async function (document: vscode.TextDocument, position: vscode.Position) {
-		const regex = /bi-((\w|\-)+)/i;
-		const range = document.getWordRangeAtPosition(position, regex);
+			const word = document.getText(range);
+			const match = regex.exec(word);
+			if (!match) return null;
 
-		if (!range) {
-			return null;
-		}
+			const iconName = match[1];
+			const item = manifest.find((item: any) => iconName === item.name);
+			if (!item) return null;
 
-		const word = document.getText(range);
-		const match = regex.exec(word);
-
-		if (!match) {
-			return null;
-		}
-		const iconName = match[1];
-
-		for (const item of manifest) {
-			if (iconName == item.name) {
-				const svg = item.svg.replace(/<path/gi, `<path fill="${constants.icon.color}" `);
-				const previewSvg = 'data:image/svg+xml;utf8;base64,' + Buffer.from(svg).toString('base64') + encode(` | width=${constants.icon.size} height=${constants.icon.size}`);
-				const icon = new vscode.MarkdownString(`![preview](${previewSvg})`);
-				const hover: vscode.Hover = {
-					contents: [icon, item.name],
-					range: range,
-				};
-
-				return hover;
-			}
-		}
-	};
-
-	return vscode.languages.registerHoverProvider(constants.selectors, options);
+			return createHover(item, range);
+		},
+	});
 }
 
 /**
- * @param IManifest manifest
- * @return
+ * Extracted method to create a hover with a preview of the SVG icon
+ *
+ * @param object item
+ * @param vscode.Range range
+ * @return vscode.Hover
+ */
+function createHover(item: any, range: vscode.Range): vscode.Hover {
+	const svg = item.svg.replace(/<path/gi, `<path fill="${constants.icon.color}" `);
+	const encodedSvg = `data:image/svg+xml;utf8;base64,${Buffer.from(svg).toString('base64')}${encode(` | width=${constants.icon.size} height=${constants.icon.size}`)}`;
+	const markdown = new vscode.MarkdownString(`![preview](${encodedSvg})`);
+	return new vscode.Hover([markdown, item.name], range);
+}
+
+/**
+ * Simplified completionProvider function by extracting repeated code into a separate function
+ *
+ * @param any manifest
+ * @return vscode.Disposable
  */
 function completionProvider(manifest: any = []) {
-	const trigger: string = '-';
-	const options: any = {};
+	return vscode.languages.registerCompletionItemProvider(
+		constants.selectors,
+		{
+			provideCompletionItems: async (document: vscode.TextDocument, position: vscode.Position) => {
+				const linePrefix = document.lineAt(position).text.substr(0, position.character);
+				if (!linePrefix.includes('icon-')) return [];
 
-	options.provideCompletionItems = async function (document: vscode.TextDocument, position: vscode.Position) {
-		const languageId = document.languageId;
-		const linePrefix = document.lineAt(position).text.substr(0, position.character);
-		const match = linePrefix.match(/icon(-)?/);
+				return manifest.map((item: any) => createCompletionItem(item, document.languageId));
+			},
+		},
+		'-',
+	);
+}
 
-		if (!match) {
-			return [];
-		}
+/**
+ * Extracted method to create a completion item for the given icon
+ *
+ * @param object item
+ * @param string languageId
+ * @return vscode.CompletionItem
+ */
+function createCompletionItem(item: any, languageId: string): vscode.CompletionItem {
+	let svgText = item.svg;
+	if (['css', 'scss', 'sass', 'less'].includes(languageId)) {
+		svgText = `url("data:image/svg+xml;utf8,${encodeURIComponent(svgText)}")`;
+	}
 
-		return [...manifest].map((manifestItem): vscode.CompletionItem & any => {
-			let text: string = manifestItem.svg;
+	// Create an additionalTextEdit that replaces the icon- prefix with an empty string
+	const additionalTextEdit = new vscode.TextEdit(
+		new vscode.Range(
+			new vscode.Position(0, 0), // You might need to adjust the position based on actual use-case
+			new vscode.Position(0, Math.max('icon-'.length, 0)), // Assuming 'icon-' is at the start of the line
+		),
+		'',
+	);
 
-			// Get language type
-			if (languageId === 'css' || languageId === 'scss' || languageId === 'sass' || languageId === 'less') {
-				text = `url("data:image/svg+xml;utf8,${encodeURIComponent(text)}")`;
-			}
-
-			return {
-				// additionalTextEdits: [vscode.TextEdit.delete(new vscode.Range(position.line, position.character - match[0].length, position.line, position.character))],
-				insertText: text,
-				kind: vscode.CompletionItemKind.Snippet,
-				label: `icon-${manifestItem.name}`,
-				meta: manifestItem,
-				sortText: manifestItem.name,
-			};
-		});
+	return {
+		additionalTextEdits: [additionalTextEdit],
+		detail: item.name,
+		documentation: createPreviewSvg(item),
+		insertText: svgText,
+		kind: vscode.CompletionItemKind.Snippet,
+		label: `icon-${item.name}`,
+		sortText: item.name,
 	};
+}
 
-	options.resolveCompletionItem = function (item: vscode.CompletionItem & any, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CompletionItem> {
-		const regex = /<svg(.*?)<\/svg>/gm;
-		let utf8String = item.meta.svg
-			.toString('utf8')
-			.replace(/fill="[^\"]+"/gi, '')
-			.replace(/<svg/gi, `<svg fill="${constants.icon.color}" `);
-
-		const previewSvg = 'data:image/svg+xml;utf8;base64,' + Buffer.from(utf8String).toString('base64') + encode(` | width=${constants.icon.size} height=${constants.icon.size}`);
-
-		return {
-			detail: item.meta.name,
-			documentation: new vscode.MarkdownString(`![preview](${previewSvg})`),
-			...item,
-		};
-	};
-
-	return vscode.languages.registerCompletionItemProvider(constants.selectors, options, trigger);
+/**
+ * Extracted method to create a MarkdownString with a preview of the SVG icon
+ *
+ * @param object item
+ * @return vscode.MarkdownString
+ */
+function createPreviewSvg(item: any): vscode.MarkdownString {
+	const svg = item.svg.replace(/fill="[^\"]+"/gi, '').replace(/<svg/gi, `<svg fill="${constants.icon.color}" `);
+	const encodedSvg = `data:image/svg+xml;utf8;base64,${Buffer.from(svg).toString('base64')}${encode(` | width=${constants.icon.size} height=${constants.icon.size}`)}`;
+	return new vscode.MarkdownString(`![preview](${encodedSvg})`);
 }

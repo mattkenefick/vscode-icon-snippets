@@ -33,23 +33,46 @@
 					},
 					"iconSnippets.selector": {
 						"default": [
+							"asciidoc",
+							"blade",
 							"css",
 							"dhtml",
+							"dustjs",
 							"edge",
+							"ejs",
+							"erb",
+							"haml",
+							"handlebars",
+							"hbs",
 							"html",
+							"jade",
 							"javascript",
 							"javascriptreact",
+							"json",
+							"less",
+							"liquid",
 							"markdown",
+							"mustache",
 							"ng-template",
+							"nunjucks",
 							"php",
 							"plaintext",
+							"postcss",
+							"pug",
+							"razor",
+							"rmd",
+							"sass",
 							"scss",
+							"stylus",
 							"twig",
 							"typescript",
 							"typescriptreact",
 							"vue",
 							"vue-html",
-							"xml"
+							"xml",
+							"xsl",
+							"yaml",
+							"yml"
 						],
 						"description": "Defines the documents where completion and hover are active",
 						"items": {
@@ -74,6 +97,7 @@
 		"@types/vscode": "^1.57.0",
 		"@typescript-eslint/eslint-plugin": "^4.26.0",
 		"@typescript-eslint/parser": "^4.26.0",
+		"@vscode/vsce": "^2.24.0",
 		"eslint": "^7.27.0",
 		"glob": "^7.1.7",
 		"mocha": "^8.4.0",
@@ -112,5 +136,5 @@
 		"vscode:prepublish": "yarn run package",
 		"watch": "webpack --watch"
 	},
-	"version": "0.3.0"
+	"version": "0.4.0"
 }
