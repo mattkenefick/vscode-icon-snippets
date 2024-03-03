@@ -10,6 +10,10 @@ Start typing the word `icon-` and you'll see a list of available icons appear wi
 
 ## Release Notes
 
+### 0.4.1
+
+-   Fix bug with some file types like Vue and similar
+
 ### 0.4.0
 
 -   Normalize width, height, and other attributes
